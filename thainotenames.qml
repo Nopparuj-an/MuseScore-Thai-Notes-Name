@@ -31,11 +31,30 @@ MuseScore {
 
    // Small note name size is fraction of the full font size.
    property real fontSizeMini: 0.7;
-   property int targetOffset: 0; // negative = left of middle C, positive = right
 
-   function nameChord (notes, text, small) {
-      var scaleOffset = targetOffset;
+   function getScaleOffset(keySignature) {
+      // Map key signatures to scale offsets
+      switch (keySignature) {
+         case -7: return 5;  // Cb major / Ab minor
+         case -6: return 10; // Gb major / Eb minor
+         case -5: return 3;  // Db major / Bb minor
+         case -4: return 8;  // Ab major / F minor
+         case -3: return 1;  // Eb major / C minor
+         case -2: return 6;  // Bb major / G minor
+         case -1: return 11; // F major / D minor
+         case 0: return 0;   // C major / A minor
+         case 1: return 5;   // G major / E minor
+         case 2: return 10;  // D major / B minor
+         case 3: return 3;   // A major / F# minor
+         case 4: return 8;   // E major / C# minor
+         case 5: return 1;   // B major / G# minor
+         case 6: return 6;   // F# major / D# minor
+         case 7: return 11;  // C# major / A# minor
+         default: return 0;  // Default to C major / A minor
+      }
+   }
 
+   function nameChord (notes, text, small, scaleOffset) {
       var sep = "\n";
       var oct = "";
       var name;
@@ -49,12 +68,18 @@ MuseScore {
          if (typeof notes[i].tpc === "undefined")
             return
 
-         var newKey = notes[i].pitch - scaleOffset;
-            
-         // Thai note mapping based on tpc (tonal pitch class)
-         switch (newKey) {
-            // middle C is 60, low C is 48, high C is 72
+         var newKey = notes[i].pitch + scaleOffset;
 
+         // if the note is too high or too low, saturate it to the same octave
+         if (newKey < 48) {
+            newKey = 48 + (newKey % 12);
+         } else if (newKey > 83) {
+            newKey = 72 + (newKey % 12);
+         }
+            
+         switch (newKey) {
+            // Thai note mapping
+            // middle C is 60, low C is 48, high C is 72
             case 48: name = "ดฺ"; break;
             case 49: name = "ดฺ♯"; break;
             case 50: name = "รฺ"; break;
@@ -165,6 +190,10 @@ MuseScore {
                if (cursor.element && cursor.element.type === Element.CHORD) {
                   var text = newElement(Element.STAFF_TEXT);      // Make a STAFF_TEXT
 
+                  // Get the key signature at the current segment
+                  var keySignature = cursor.keySignature;
+                  var scaleOffset = getScaleOffset(keySignature);
+
                   // First...we need to scan grace notes for existence and break them
                   // into their appropriate lists with the correct ordering of notes.
                   var leadingLifo = Array();   // List for leading grace notes
@@ -184,11 +213,11 @@ MuseScore {
                   }
 
                   // Next process the leading grace notes, should they exist...
-                  text = renderGraceNoteNames(cursor, leadingLifo, text, true)
+                  text = renderGraceNoteNames(cursor, leadingLifo, text, true, scaleOffset)
 
                   // Now handle the note names on the main chord...
                   var notes = cursor.element.notes;
-                  nameChord(notes, text, false);
+                  nameChord(notes, text, false, scaleOffset);
                   if (text.text)
                      cursor.add(text);
 
@@ -200,7 +229,7 @@ MuseScore {
                      text = newElement(Element.STAFF_TEXT) // Make another STAFF_TEXT object
 
                   // Finally process trailing grace notes if they exist...
-                  text = renderGraceNoteNames(cursor, trailingFifo, text, true)
+                  text = renderGraceNoteNames(cursor, trailingFifo, text, true, scaleOffset)
                } // end if CHORD
                cursor.next();
             } // end while segment

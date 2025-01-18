@@ -35,21 +35,21 @@ MuseScore {
    function getScaleOffset(keySignature) {
       // Map key signatures to scale offsets
       switch (keySignature) {
-         case -7: return 5;  // Cb major / Ab minor
-         case -6: return 10; // Gb major / Eb minor
-         case -5: return 3;  // Db major / Bb minor
-         case -4: return 8;  // Ab major / F minor
-         case -3: return 1;  // Eb major / C minor
-         case -2: return 6;  // Bb major / G minor
-         case -1: return 11; // F major / D minor
-         case 0: return 0;   // C major / A minor
-         case 1: return 5;   // G major / E minor
-         case 2: return 10;  // D major / B minor
+         case -4: return 4;  // Ab major / F minor
          case 3: return 3;   // A major / F# minor
-         case 4: return 8;   // E major / C# minor
+         case -2: return 2;  // Bb major / G minor
          case 5: return 1;   // B major / G# minor
-         case 6: return 6;   // F# major / D# minor
-         case 7: return 11;  // C# major / A# minor
+         case -7: return 1;  // Cb major / Ab minor
+         case 0: return 0;   // C major / A minor
+         case 7: return -1;  // C# major / A# minor
+         case -5: return -1; // Db major / Bb minor
+         case 2: return -2;  // D major / B minor
+         case -3: return -3; // Eb major / C minor
+         case 4: return -4;  // E major / C# minor
+         case -1: return -5; // F major / D minor
+         case 6: return -6;  // F# major / D# minor
+         case -6: return -6; // Gb major / Eb minor
+         case 1: return -7;  // G major / E minor
          default: return 0;  // Default to C major / A minor
       }
    }
